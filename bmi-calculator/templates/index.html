@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutraFit - BMI Calculator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>NutraFit - BMI Calculator</h1>
+            <h4>Calculate your BMI and get personalized health recommendations</h4>
+        </header>
+        <form id="bmiForm">
+            <!-- Gender selection -->
+            <div class="gender-selection">
+                <label for="gender">Gender:</label>
+                <div class="gender-options">
+                    <input type="radio" id="male" name="gender" value="male">
+                    <label for="male">
+                        <img src="static/images/male-icon.jpeg" alt="Male" class="gender-icon">
+                    </label>
+                    <input type="radio" id="female" name="gender" value="female">
+                    <label for="female">
+                        <img src="static/images/female-icon.jpeg" alt="Female" class="gender-icon">
+                    </label>
+                </div>
+            </div>
+
+            <label for="age">Age:</label>
+            <input type="number" id="age" name="age" placeholder="Enter your age">
+
+            <label for="weight">Weight (kg):</label>
+            <input type="number" id="weight" name="weight" placeholder="Enter your weight" required>
+        
+            <label for="height_cm">Height (cm):</label>
+            <input type="number" id="height_cm" name="height_cm" placeholder="Enter height in cm" required>
+        
+            <button type="submit">Calculate BMI</button>
+        </form>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('bmiForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+    
+            // Get input values
+            const gender = document.querySelector('input[name="gender"]:checked')?.value;
+            const age = document.getElementById('age').value.trim();
+            const weight = document.getElementById('weight').value.trim();
+            const height_cm = document.getElementById('height_cm').value.trim();
+    
+            // Validate inputs
+            if (!gender) {
+                alert("Please select a gender.");
+                return;
+            }
+            if (!age || age <= 0) {
+                alert("Please enter a valid age.");
+                return;
+            }
+            if (!weight || weight <= 0) {
+                alert("Please enter a valid weight.");
+                return;
+            }
+            if (!height_cm || height_cm <= 0) {
+                alert("Please enter a valid height.");
+                return;
+            }
+    
+            // Send data to backend
+            fetch('/calculate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    gender, 
+                    age: parseInt(age), 
+                    weight: parseFloat(weight), 
+                    height: parseFloat(height_cm) 
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Handle backend errors
+                if (data.error) {
+                    document.getElementById('result').innerHTML = `<p class="error">${data.error}</p>`;
+                    return;
+                }
+    
+                // Render results
+                let result = `<h2>BMI: ${data.bmi}</h2>`;
+                result += `<p>Status: ${data.status}</p>`;
+                result += `<p>Diet: ${data.diet}</p>`;
+                result += `<p>Ideal Weight Range: ${data.ideal_weight_range}</p>`;
+    
+                // Health risks
+                result += "<h3>Health Risks:</h3><ul>";
+                data.risks.forEach(risk => {
+                    result += `<li>${risk}</li>`;
+                });
+                result += "</ul>";
+    
+                // Remedies
+                result += "<h3>Remedies:</h3><ul>";
+                data.remedies.forEach(remedy => {
+                    result += `<li>${remedy}</li>`;
+                });
+                result += "</ul>";
+    
+                // Food recommendations
+                result += "<h3>Recommended Foods:</h3>";
+                for (let category in data.foods) {
+                    result += `<h4>${category}</h4><ul>`;
+                    data.foods[category].forEach(food => {
+                        const mark = food.vegetarian 
+                            ? "<span class='green-box'>✔ Vegetarian</span>" 
+                            : "<span class='red-box'>✔ Non-Vegetarian</span>";
+                        result += `
+                            <li>
+                                <img src="${food.image}" alt="${food.name}" width="100">
+                                ${food.name} ${mark}
+                            </li>
+                        `;
+                    });
+                    result += "</ul>";
+                }
+    
+                document.getElementById('result').innerHTML = result;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML = `<p class="error">An error occurred: ${error.message}</p>`;
+            });
+        });
+    </script>    
+    <footer class="footer">
+        <p>"Your health is your greatest wealth. Take the first step today toward a healthier, happier you – because you deserve nothing less than your best self."</p>
+        <p>&copy; 2024 NutraFit. All rights reserved.</p>
+    </footer>
+    
+</body>
+</html>

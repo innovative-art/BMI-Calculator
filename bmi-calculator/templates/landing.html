@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutraFit - Your Health Companion</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="landing-container">
+        <header>
+            <h1>Welcome to NutraFit</h1>
+            <p>Your Health Companion - Track Your BMI and Improve Your Fitness</p>
+        </header>
+        
+        <div class="landing-buttons">
+            <a href="{{ url_for('bmi_calculator') }}" class="btn-primary">Start Calculating BMI</a> <!-- Updated route here -->
+            <a href="#about" class="btn-secondary">Learn More</a>
+        </div>
+
+        <section id="about">
+            <h2>Why NutraFit?</h2>
+            <p>NutraFit is designed to help you stay on top of your health goals. Whether you want to maintain your current weight or work towards your fitness goals, NutraFit is here to guide you through the process with personalized recommendations, health tips, and diet suggestions.</p>
+        </section>
+
+        <footer>
+            <p>&copy; 2024 NutraFit | All Rights Reserved</p>
+        </footer>
+    </div>
+</body>
+</html>
